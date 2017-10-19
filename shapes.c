@@ -28,8 +28,12 @@ void moveShape(HDC hdc, HWND hwnd, Shape* shape, int dx, int dy)
 	
 	// refresh old and new area of the shape
 	LPtoDP(hdc, (PPOINT)&shapeRect, 2);
+	shapeRect.right +=1;
+	shapeRect.bottom +=1;
 	InvalidateRect(hwnd, &shapeRect, FALSE);
 	shapeRect = getShapeRect(shape);
+	shapeRect.right +=1;
+	shapeRect.bottom +=1;
 	LPtoDP(hdc, (PPOINT)&shapeRect, 2);
 	InvalidateRect(hwnd, &shapeRect, FALSE);
 }
@@ -48,7 +52,7 @@ RECT getShapeRect(Shape* shape)
 	rect.left = shape->origin.x - (shape->rectSide)/2;
 	rect.top = shape->origin.y - (shape->rectSide)/2;
 	rect.right = shape->origin.x + (shape->rectSide)/2;
-	rect.bottom = shape->origin.y + (shape->rectSide)/2 ;
+	rect.bottom = shape->origin.y + (shape->rectSide)/2;
 	return rect;
 }
 
@@ -111,10 +115,10 @@ void drawTriangle(HDC* hdc, Shape* shape)
  	points[0].x = shape->origin.x;
 	points[0].y = rect.top;
 	points[1].x = rect.left;
-	points[1].y = rect.bottom - 1;
-	points[2].x = rect.right - 1;
-	points[2].y = rect.bottom - 1;
- 	
+	points[1].y = rect.bottom;
+	points[2].x = rect.right;
+	points[2].y = rect.bottom;
+
 	Polygon(*hdc, points, 3);
 	
 	DeleteObject(hPen);
