@@ -103,7 +103,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 				break;
 		}
 		PostMessage(HWND_BROADCAST, shapeUpdateMsg, currentShape->origin.x, currentShape->origin.y);
-		UpdateWindow(hwnd);
 	}
 
     return 0;
