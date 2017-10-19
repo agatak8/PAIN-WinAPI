@@ -1,6 +1,6 @@
 #include "globals.h"
 
-double scale = 1;
+double scale = 0.75;
 
 LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -10,7 +10,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     RECT rect;
 	int height = HIWORD(lParam);
 	const WORD ID_TIMER = 1;
-	GetClientRect(hwnd, &rect);
 	int dx, dy;
 	Shape* shape = NULL;
 	BOOL gotUpdate = FALSE;
@@ -36,6 +35,9 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 		dy = lParam - shape->origin.y;
 		
 		hdc = GetDC(hwnd);
+		SetMapMode(hdc, MM_ISOTROPIC);
+		SetWindowExtEx (hdc, 32767, 32767, NULL) ;
+		SetViewportExtEx (hdc, scale*32767, scale*32767, NULL) ;
 		shape->move(hdc, hwnd, shape, dx, dy);
 		ReleaseDC(hwnd, hdc);
 	}
@@ -44,11 +46,24 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     {
 		case WM_CREATE:	 
 			createShapes(shapes);
+			hdc = BeginPaint(hwnd, & ps);
+			SetMapMode(hdc, MM_ISOTROPIC);
+			SetWindowExtEx (hdc, 32767, 32767, NULL) ;
+			SetViewportExtEx (hdc, scale*32767, scale*32767, NULL) ;
+			GetClientRect(hwnd, &rect);
+			DPtoLP(hdc, (PPOINT) &rect, 2);
+			clear(&hdc, rect);
+			EndPaint(hwnd, & ps);
 			PostMessage(HWND_BROADCAST, updateRequestMsg, 0, 0);
 			break;
 			
 	    case WM_PAINT:
 			hdc = BeginPaint(hwnd, & ps);
+			SetMapMode(hdc, MM_ISOTROPIC);
+			SetWindowExtEx (hdc, 32767, 32767, NULL) ;
+			SetViewportExtEx (hdc, scale*32767, scale*32767, NULL) ;
+			GetClientRect(hwnd, &rect);
+			DPtoLP(hdc, (PPOINT) &rect, 2);
 			clear(&hdc, rect);
 			drawShapes(&hdc, shapes);
 			EndPaint(hwnd, & ps);

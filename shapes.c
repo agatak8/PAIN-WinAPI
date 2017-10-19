@@ -27,8 +27,10 @@ void moveShape(HDC hdc, HWND hwnd, Shape* shape, int dx, int dy)
 	shape->draw(&hdc, shape);	
 	
 	// refresh old and new area of the shape
+	LPtoDP(hdc, (PPOINT)&shapeRect, 2);
 	InvalidateRect(hwnd, &shapeRect, FALSE);
 	shapeRect = getShapeRect(shape);
+	LPtoDP(hdc, (PPOINT)&shapeRect, 2);
 	InvalidateRect(hwnd, &shapeRect, FALSE);
 }
 
