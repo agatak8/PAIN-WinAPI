@@ -68,6 +68,26 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 			drawShapes(&hdc, shapes);
 			EndPaint(hwnd, & ps);
 	   		break;
+	   		
+	   	case WM_KEYDOWN:
+			switch(wParam)
+			{
+				case VK_OEM_PLUS:
+					if(GetKeyState(VK_CONTROL) & 0x8000)
+					{
+						scale += SCALE_SPEED;
+						InvalidateRect(hwnd, NULL, FALSE);
+					}
+					break;
+				case VK_OEM_MINUS:
+					if(GetKeyState(VK_CONTROL) & 0x8000)
+					{
+						scale -= SCALE_SPEED;
+						InvalidateRect(hwnd, NULL, FALSE);
+					}
+					break;
+			}
+			break;
 			
   		case WM_DESTROY:
             PostQuitMessage (0); /* send a WM_QUIT to the message queue */

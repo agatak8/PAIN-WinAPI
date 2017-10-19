@@ -20,6 +20,7 @@
 #define SQUARE_N 2
 
 #define MOVE_SPEED 5
+#define SCALE_SPEED 0.1
 
 extern int currentShapeN;
 extern Shape shapes[3];
