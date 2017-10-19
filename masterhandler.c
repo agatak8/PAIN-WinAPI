@@ -8,7 +8,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     RECT rect;
 	int height = HIWORD(lParam);
 	const WORD ID_TIMER = 1;
-	GetClientRect(hwnd, &rect);
 	Shape* currentShape;
 	int shapeUpdateMsg;
 	BOOL needUpdate = FALSE;
@@ -21,12 +20,13 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 		PostMessage(HWND_BROADCAST, squareUpdateMsg, shapes[SQUARE_N].origin.x, shapes[SQUARE_N].origin.y);
 	}
 	
-	switch (message)                  /* handle the messages */
-    {
+	switch (message) /* handle the messages */
+	    {
 		case WM_CREATE:	 
 			createShapes(shapes);
 	    case WM_PAINT:
 			hdc = BeginPaint(hwnd, & ps);
+			GetClientRect(hwnd, &rect);
 			clear(&hdc, rect);
 			drawShapes(&hdc, shapes);
 			EndPaint(hwnd, & ps);
