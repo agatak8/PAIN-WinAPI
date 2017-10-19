@@ -33,7 +33,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 	   		break;
 	   		
 	   	case WM_KEYDOWN:
-			currentShape = &shapes[currentShapeN];
 			switch (wParam) 
 			{
 				case VK_LEFT:
@@ -53,26 +52,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 					 dy = MOVE_SPEED;
 					 break;
 			}
-			if(dx != 0 || dy != 0)
-			{
-				hdc = GetDC(hwnd);
-				currentShape->move(hdc, hwnd, currentShape, dx, dy);
-				ReleaseDC(hwnd, hdc);
-				switch(currentShapeN)
-				{
-					case CIRCLE_N:
-						shapeUpdateMsg = circleUpdateMsg;
-						break;
-					case TRIANGLE_N:
-						shapeUpdateMsg = triangleUpdateMsg;
-						break;
-					case SQUARE_N:
-						shapeUpdateMsg = squareUpdateMsg;
-						break;
-				}
-				PostMessage(HWND_BROADCAST, shapeUpdateMsg, currentShape->origin.x, currentShape->origin.y);
-				UpdateWindow(hwnd);
-			}
 			break;
 			
 		case WM_CHAR:
@@ -90,6 +69,12 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 			}
 			break;
 			
+		case WM_LBUTTONDOWN:
+			currentShape = &shapes[currentShapeN];
+			dx = LOWORD(lParam) - (currentShape->origin.x);
+			dy = HIWORD(lParam) - (currentShape->origin.y);
+			break;
+			
   		case WM_DESTROY:
             PostQuitMessage (0); /* send a WM_QUIT to the message queue */
             break;
@@ -97,8 +82,29 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         default:   
 			/* for messages that we don't deal with */
             return DefWindowProc (hwnd, message, wParam, lParam);
-        UpdateWindow(hwnd);
     }
+    
+    if(dx != 0 || dy != 0)
+	{
+		currentShape = &shapes[currentShapeN];
+		hdc = GetDC(hwnd);
+		currentShape->move(hdc, hwnd, currentShape, dx, dy);
+		ReleaseDC(hwnd, hdc);
+		switch(currentShapeN)
+		{
+			case CIRCLE_N:
+				shapeUpdateMsg = circleUpdateMsg;
+				break;
+			case TRIANGLE_N:
+				shapeUpdateMsg = triangleUpdateMsg;
+				break;
+			case SQUARE_N:
+				shapeUpdateMsg = squareUpdateMsg;
+				break;
+		}
+		PostMessage(HWND_BROADCAST, shapeUpdateMsg, currentShape->origin.x, currentShape->origin.y);
+		UpdateWindow(hwnd);
+	}
 
     return 0;
 }
