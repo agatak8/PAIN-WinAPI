@@ -55,7 +55,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 	hwnd = CreateWindowEx (
 		   0,                   /* Extended possibilites for variation */
 		   TEXT("Shapes"),         /* Classname */
-		   TEXT("Shapes"),       /* Title Text */
+		   "Shapes",       /* Title Text */
 		   WS_OVERLAPPEDWINDOW, /* default window */
 		   CW_USEDEFAULT,       /* Windows decides the position */
 		   CW_USEDEFAULT,       /* were the window ends up on the screen */
