@@ -1,5 +1,8 @@
 #include "globals.h"
 
+POINT mouseBegin;
+BOOL mouseClick = FALSE;
+
 #define SETMAPMODE() {\
 	GetClientRect(hwnd, &rect);\
 	SetViewportOrgEx(hdc, rect.right/2, rect.bottom/2, NULL);\
@@ -33,6 +36,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 			clear(&hdc, rect);
 			createShapes(hdc, shapes);
 			EndPaint(hwnd, &ps);
+			mouseClick = FALSE;
 			
 	    case WM_PAINT:
 			hdc = BeginPaint(hwnd, & ps);
@@ -81,16 +85,26 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 			break;
 			
 		case WM_LBUTTONDOWN:
-			currentShape = &shapes[currentShapeN];
-			mouse.x = LOWORD(lParam);
-			mouse.y = HIWORD(lParam);
-			hdc = GetDC(hwnd);
-			SETMAPMODE();
-			DPtoLP(hdc, &mouse, 1);
-			ReleaseDC(hwnd, hdc);
+			mouseBegin.x = LOWORD(lParam);
+			mouseBegin.y = HIWORD(lParam);
+			mouseClick = TRUE;
+			break;
 			
-			dx = mouse.x - (currentShape->origin.x);
-			dy = mouse.y - (currentShape->origin.y);
+		case WM_LBUTTONUP:
+			if(mouseClick)
+			{
+				currentShape = &shapes[currentShapeN];
+				mouse.x = LOWORD(lParam);
+				mouse.y = HIWORD(lParam);
+				hdc = GetDC(hwnd);
+				SETMAPMODE();
+				DPtoLP(hdc, &mouse, 1);
+				DPtoLP(hdc, &mouseBegin, 1);
+				ReleaseDC(hwnd, hdc);
+				dx = mouse.x - mouseBegin.x;
+				dy = mouse.y - mouseBegin.y;
+			}
+			mouseClick = FALSE;			
 			break;
 			
   		case WM_DESTROY:
