@@ -1,5 +1,5 @@
 ifeq ($(OS),Windows_NT)
-	CC=cl
+	CC=gcc
 else
 	CC=i686-w64-mingw32-gcc-win32
 endif
