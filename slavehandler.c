@@ -1,6 +1,14 @@
 #include "globals.h"
 
-double scale = 0.75;
+#define SETMAPMODE() {\
+	GetClientRect(hwnd, &rect);\
+	SetViewportOrgEx(hdc, rect.right/2, rect.bottom/2, NULL);\
+	SetMapMode(hdc, MM_ISOTROPIC);\
+	SetWindowExtEx(hdc, 32767, -32767, NULL);\
+	SetViewportExtEx(hdc, scale*32767, scale*32767, NULL);\
+	}
+
+double scale = 0.5;
 
 LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -8,11 +16,8 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 	HDC hdc; 
     HBRUSH hBrush;
     RECT rect;
-	int height = HIWORD(lParam);
-	const WORD ID_TIMER = 1;
 	int dx, dy;
 	Shape* shape = NULL;
-	BOOL gotUpdate = FALSE;
 	
 	if(message == circleUpdateMsg)
 	{
@@ -35,9 +40,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 		dy = lParam - shape->origin.y;
 		
 		hdc = GetDC(hwnd);
-		SetMapMode(hdc, MM_ISOTROPIC);
-		SetWindowExtEx (hdc, 32767, 32767, NULL) ;
-		SetViewportExtEx (hdc, scale*32767, scale*32767, NULL) ;
+		SETMAPMODE();
 		shape->move(hdc, hwnd, shape, dx, dy);
 		ReleaseDC(hwnd, hdc);
 	}
@@ -45,12 +48,9 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 	switch (message)
     {
 		case WM_CREATE:	 
-			createShapes(shapes);
 			hdc = BeginPaint(hwnd, & ps);
-			SetMapMode(hdc, MM_ISOTROPIC);
-			SetWindowExtEx (hdc, 32767, 32767, NULL) ;
-			SetViewportExtEx (hdc, scale*32767, scale*32767, NULL) ;
-			GetClientRect(hwnd, &rect);
+			SETMAPMODE();
+			createShapes(hdc, shapes);
 			DPtoLP(hdc, (PPOINT) &rect, 2);
 			clear(&hdc, rect);
 			EndPaint(hwnd, & ps);
@@ -59,10 +59,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 			
 	    case WM_PAINT:
 			hdc = BeginPaint(hwnd, & ps);
-			SetMapMode(hdc, MM_ISOTROPIC);
-			SetWindowExtEx (hdc, 32767, 32767, NULL) ;
-			SetViewportExtEx (hdc, scale*32767, scale*32767, NULL) ;
-			GetClientRect(hwnd, &rect);
+			SETMAPMODE();
 			DPtoLP(hdc, (PPOINT) &rect, 2);
 			clear(&hdc, rect);
 			drawShapes(&hdc, shapes);
@@ -73,14 +70,14 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 			switch(wParam)
 			{
 				case VK_OEM_PLUS:
-					if(GetKeyState(VK_CONTROL) & 0x8000)
+					if(GetKeyState(VK_CONTROL) & 0x8000 && scale <= 50*SCALE_SPEED)
 					{
 						scale += SCALE_SPEED;
 						InvalidateRect(hwnd, NULL, FALSE);
 					}
 					break;
 				case VK_OEM_MINUS:
-					if(GetKeyState(VK_CONTROL) & 0x8000)
+					if(GetKeyState(VK_CONTROL) & 0x8000 && scale >= 2*SCALE_SPEED)
 					{
 						scale -= SCALE_SPEED;
 						InvalidateRect(hwnd, NULL, FALSE);

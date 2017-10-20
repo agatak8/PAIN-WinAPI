@@ -7,13 +7,6 @@ void drawCircle(HDC*, Shape*);
 void drawTriangle(HDC*, Shape*);
 void drawSquare(HDC*, Shape*);
 
-
-int cmToPixels(double cm)
-{
-    double tst = (double) GetDeviceCaps(GetDC(NULL), LOGPIXELSY);
-    return (int)((double)(tst/2.54)*cm);
-}
-
 int randint(int min, int max)
 {
 	return (rand()%(max + 1) + min);
@@ -26,15 +19,16 @@ void moveShape(HDC hdc, HWND hwnd, Shape* shape, int dx, int dy)
 	shape->origin.y += dy;
 	shape->draw(&hdc, shape);	
 	
-	// refresh old and new area of the shape
+	// refresh old shape area
 	LPtoDP(hdc, (PPOINT)&shapeRect, 2);
 	shapeRect.right +=1;
 	shapeRect.bottom +=1;
 	InvalidateRect(hwnd, &shapeRect, FALSE);
+	// refresh new shape area
 	shapeRect = getShapeRect(shape);
+	LPtoDP(hdc, (PPOINT)&shapeRect, 2);
 	shapeRect.right +=1;
 	shapeRect.bottom +=1;
-	LPtoDP(hdc, (PPOINT)&shapeRect, 2);
 	InvalidateRect(hwnd, &shapeRect, FALSE);
 }
 
@@ -50,9 +44,9 @@ RECT getShapeRect(Shape* shape)
 {
 	RECT rect;
 	rect.left = shape->origin.x - (shape->rectSide)/2;
-	rect.top = shape->origin.y - (shape->rectSide)/2;
+	rect.top = shape->origin.y + (shape->rectSide)/2;
 	rect.right = shape->origin.x + (shape->rectSide)/2;
-	rect.bottom = shape->origin.y + (shape->rectSide)/2;
+	rect.bottom = shape->origin.y - (shape->rectSide)/2;
 	return rect;
 }
 
@@ -163,7 +157,7 @@ void clear(HDC* hdc, RECT rect)
 	DeleteObject(hBrush);
 }
 
-void createShapes(Shape* shapesBuf)
+void createShapes(HDC hdc, Shape* shapesBuf)
 {
 	POINT origins[3];
 	for(int i = 0; i < 3; ++i)
@@ -171,8 +165,9 @@ void createShapes(Shape* shapesBuf)
 		origins[i].x = randint(0, PAIN_WIDTH);
 		origins[i].y = randint(0, PAIN_HEIGHT);
 	}
-	shapesBuf[CIRCLE_N] = createCircle(origins[CIRCLE_N], CIRCLE_COLOR, cmToPixels(CIRCLE_RADIUS_CM));
-	shapesBuf[TRIANGLE_N] = createTriangle(origins[TRIANGLE_N], TRIANGLE_COLOR, cmToPixels(TRIANGLE_SIDE_CM));
-	shapesBuf[SQUARE_N] = createSquare(origins[SQUARE_N], SQUARE_COLOR, cmToPixels(SQUARE_SIDE_CM));	
+	DPtoLP(hdc, origins, 3);
+	shapesBuf[CIRCLE_N] = createCircle(origins[CIRCLE_N], CIRCLE_COLOR, CIRCLE_RADIUS_CM*100);
+	shapesBuf[TRIANGLE_N] = createTriangle(origins[TRIANGLE_N], TRIANGLE_COLOR, TRIANGLE_SIDE_CM*100);
+	shapesBuf[SQUARE_N] = createSquare(origins[SQUARE_N], SQUARE_COLOR, SQUARE_SIDE_CM*100);	
 }
 

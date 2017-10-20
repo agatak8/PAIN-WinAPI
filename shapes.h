@@ -21,4 +21,4 @@ int cmToPixels(double cm);
 RECT getShapeRect(Shape*);
 void drawShapes(HDC* hdc, Shape* shapes);
 void clear(HDC* hdc, RECT rect);
-void createShapes(Shape* shapesBuf);
+void createShapes(HDC hdc, Shape* shapesBuf);

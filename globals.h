@@ -19,8 +19,8 @@
 #define TRIANGLE_N 1
 #define SQUARE_N 2
 
-#define MOVE_SPEED 5
-#define SCALE_SPEED 0.1
+#define MOVE_SPEED 50
+#define SCALE_SPEED 0.025
 
 extern int currentShapeN;
 extern Shape shapes[3];

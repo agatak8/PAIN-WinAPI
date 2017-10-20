@@ -1,17 +1,21 @@
 #include "globals.h"
 
+#define SETMAPMODE() {\
+	GetClientRect(hwnd, &rect);\
+	SetViewportOrgEx(hdc, rect.right/2, rect.bottom/2, NULL);\
+	SetMapMode(hdc, MM_LOMETRIC);\
+	}
+
 LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
 	HDC hdc; 
     HBRUSH hBrush;
     RECT rect;
-	int height = HIWORD(lParam);
-	const WORD ID_TIMER = 1;
 	Shape* currentShape;
 	int shapeUpdateMsg;
-	BOOL needUpdate = FALSE;
 	int dx = 0, dy = 0;
+	POINT mouse;
 	
 	if (message == updateRequestMsg)
 	{
@@ -22,11 +26,18 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 	
 	switch (message) /* handle the messages */
 	    {
-		case WM_CREATE:	 
-			createShapes(shapes);
+		case WM_CREATE:
+			hdc = BeginPaint(hwnd, & ps);
+			SETMAPMODE();
+			DPtoLP(hdc, (PPOINT) &rect, 2);
+			clear(&hdc, rect);
+			createShapes(hdc, shapes);
+			EndPaint(hwnd, &ps);
+			
 	    case WM_PAINT:
 			hdc = BeginPaint(hwnd, & ps);
-			GetClientRect(hwnd, &rect);
+			SETMAPMODE();
+			DPtoLP(hdc, (PPOINT) &rect, 2);
 			clear(&hdc, rect);
 			drawShapes(&hdc, shapes);
 			EndPaint(hwnd, & ps);
@@ -45,11 +56,11 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 					 break;
 				case VK_UP:
 					 dx = 0;
-					 dy = -MOVE_SPEED;
+					 dy = MOVE_SPEED;
 					 break;
 				case VK_DOWN:
 					 dx = 0;
-					 dy = MOVE_SPEED;
+					 dy = -MOVE_SPEED;
 					 break;
 			}
 			break;
@@ -71,8 +82,15 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 			
 		case WM_LBUTTONDOWN:
 			currentShape = &shapes[currentShapeN];
-			dx = LOWORD(lParam) - (currentShape->origin.x);
-			dy = HIWORD(lParam) - (currentShape->origin.y);
+			mouse.x = LOWORD(lParam);
+			mouse.y = HIWORD(lParam);
+			hdc = GetDC(hwnd);
+			SETMAPMODE();
+			DPtoLP(hdc, &mouse, 1);
+			ReleaseDC(hwnd, hdc);
+			
+			dx = mouse.x - (currentShape->origin.x);
+			dy = mouse.y - (currentShape->origin.y);
 			break;
 			
   		case WM_DESTROY:
@@ -88,6 +106,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 	{
 		currentShape = &shapes[currentShapeN];
 		hdc = GetDC(hwnd);
+		SETMAPMODE();
 		currentShape->move(hdc, hwnd, currentShape, dx, dy);
 		ReleaseDC(hwnd, hdc);
 		switch(currentShapeN)
