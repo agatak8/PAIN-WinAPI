@@ -48,12 +48,12 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 	switch (message)
     {
 		case WM_CREATE:	 
-			hdc = BeginPaint(hwnd, & ps);
+			hdc = GetDC(hwnd);
 			SETMAPMODE();
 			createShapes(hdc, shapes);
 			DPtoLP(hdc, (PPOINT) &rect, 2);
 			clear(&hdc, rect);
-			EndPaint(hwnd, & ps);
+			ReleaseDC(hwnd, hdc);
 			PostMessage(HWND_BROADCAST, updateRequestMsg, 0, 0);
 			break;
 			
